@@ -1,25 +1,30 @@
 # Automating the nginx installing process and adding custom header.
 
-exec {'update':
-  provider => shell,
-  command  => 'sudo apt-get -y update',
-  before   => Exec['install Nginx'],
+package { 'nginx':
+  ensure => installed,
 }
 
-exec {'install Nginx':
-  provider => shell,
-  command  => 'sudo apt-get -y install nginx',
-  before   => Exec['add_header'],
+service { 'nginx':
+  ensure => running,
+  enable => true,
+  require => Package['nginx'],
 }
 
-exec { 'add_header':
-  provider    => shell,
-  environment => ["HOST=${hostname}"],
-  command     => 'sudo echo "add_header X-Served-By $hostname;" | sudo tee /etc/nginx/conf.d/custom_header.conf',
-  before      => Exec['restart Nginx'],
+file { '/var/www/html/index.nginx-debian.html':
+  ensure  => present,
+  content => 'Hello World!',
+  require => Package['nginx'],
 }
 
-exec { 'restart Nginx':
-  provider => shell,
-  command  => 'sudo service nginx restart',
+file { '/etc/nginx/conf.d/custom_header.conf':
+  ensure  => present,
+  content => 'add_header X-Served-By $hostname;',
+  require => Package['nginx'],
+}
+
+exec { 'allow_http':
+  command => 'ufw allow "Nginx HTTP"',
+  path    => ['/bin', '/usr/bin'],
+  unless  => 'ufw status | grep "Nginx HTTP"',
+  require => Package['nginx'],
 }
