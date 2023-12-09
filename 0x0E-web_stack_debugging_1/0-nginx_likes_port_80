@@ -1,32 +1,5 @@
 #!/usr/bin/env bash
 # Start listening to port 80.
 
-sudo cat > /etc/nginx/sites-enabled/default << EOF
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    add_header X-Served-By \$HOSTNAME;
-    root   /var/www/html;
-    index  index.html index.htm index.nginx-debian.html;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-
-    location /hbnb_static {
-        alias /data/web_static/current;
-        index index.html index.htm;
-    }
-
-    location /redirect_me {
-        return 301 http://cuberule.com/;
-    }
-
-    error_page 404 /404.html;
-    location /404 {
-        root /var/www/html;
-        internal;
-    }
-}
-EOF
+sudo sed -i "s/8080/80/" /etc/nginx/sites-enabled/default
 sudo service nginx restart
