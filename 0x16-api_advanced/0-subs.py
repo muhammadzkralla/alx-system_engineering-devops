@@ -3,25 +3,26 @@
 Reddit subs
 """
 
-from requests import get
+import requests
 
 
 def number_of_subscribers(subreddit):
     """
-    function that queries the Reddit API and returns the number of subscribers
-    (not active users, total subscribers) for a given subreddit.
+    Queries the Reddit API.
+    If not a valid subreddit, returns 0.
     """
+    url = f"https://www.reddit.com/r/{subreddit}/about.json"
+    headers = {'User-Agent': 'Custom User Agent'}
+    response = requests.get(url, headers=headers)
 
-    if subreddit is None or not isinstance(subreddit, str):
+    # Check if the subreddit exists
+    if response.status_code == 200:
+        return response.json()['data']['subscribers']
+    else:
         return 0
 
-    user_agent = {'User-agent': 'Google Chrome Version 81.0.4044.129'}
-    url = 'https://www.reddit.com/r/{}/about.json'.format(subreddit)
-    response = get(url, headers=user_agent)
-    results = response.json()
 
-    try:
-        return results.get('data').get('subscribers')
-
-    except Exception:
-        return 0
+# Test the function
+if __name__ == '__main__':
+    subreddit = input("Enter subreddit name: ")
+    print(number_of_subscribers(subreddit))
