@@ -1,28 +1,16 @@
 #!/usr/bin/python3
-"""
-Reddit subs
-"""
-
+"""Query subs in Reddit"""
 import requests
 
 
 def number_of_subscribers(subreddit):
-    """
-    Queries the Reddit API.
-    If not a valid subreddit, returns 0.
-    """
-    url = f"https://www.reddit.com/r/{subreddit}/about.json"
-    headers = {'User-Agent': 'Custom User Agent'}
-    response = requests.get(url, headers=headers)
-
-    # Check if the subreddit exists
-    if response.status_code == 200:
-        return response.json()['data']['subscribers']
-    else:
+    """Return Number of subs"""
+    url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
+    headers = {
+        "User-Agent": "linux:0x16.api.advanced:v1.0.0 (by /u/bdov_)"
+    }
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 404:
         return 0
-
-
-# Test the function
-if __name__ == '__main__':
-    subreddit = input("Enter subreddit name: ")
-    print(number_of_subscribers(subreddit))
+    results = response.json().get("data")
+    return results.get("subscribers")
