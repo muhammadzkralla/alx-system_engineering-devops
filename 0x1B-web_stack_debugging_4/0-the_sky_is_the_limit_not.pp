@@ -1,34 +1,12 @@
-# 0-the_sky_is_the_limit_not.pp
+# Handle a huge amount of requests.
 
-# Install Nginx package
-package { 'nginx':
-  ensure => installed,
+exec {'replace':
+  provider => shell,
+  command  => 'sudo sed -i "s/ULIMIT=\"-n 15\"/ULIMIT=\"-n 4096\"/" /etc/default/nginx',
+  before   => Exec['restart'],
 }
 
-# Update Nginx configuration file
-file { '/etc/nginx/sites-available/default':
-  ensure  => present,
-  content => '
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server ipv6only=on;
-
-    root /usr/share/nginx/html;
-    index index.html index.htm;
-
-    server_name localhost;
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}
-',
-  notify  => Service['nginx'],
-}
-
-# Ensure Nginx service is running
-service { 'nginx':
-  ensure    => running,
-  enable    => true,
-  subscribe => File['/etc/nginx/sites-available/default'],
+exec {'restart':
+  provider => shell,
+  command  => 'sudo service nginx restart',
 }
